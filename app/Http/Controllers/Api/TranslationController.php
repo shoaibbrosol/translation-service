@@ -47,10 +47,11 @@ class TranslationController extends Controller
     /**
      * Display the specified translation.
      */
-    public function show(Translation $translation): JsonResponse
+    public function show($id): JsonResponse
     {
+        $translation = Translation::with('tags')->findOrFail($id);
         return response()->json(
-            new TranslationResource($translation->load('tags'))
+            new TranslationResource($translation)
         );
     }
 
@@ -59,10 +60,10 @@ class TranslationController extends Controller
      *
      * @throws ValidationException
      */
-    public function update(Request $request, Translation $translation): JsonResponse
+    public function update(Request $request, $id): JsonResponse
     {
         $validated = $this->validateRequest($request);
-
+        $translation = Translation::findOrFail($id);
         $translation->update($validated);
 
         $this->syncTags($translation, $validated['tags'] ?? []);
@@ -75,8 +76,9 @@ class TranslationController extends Controller
     /**
      * Remove the specified translation.
      */
-    public function destroy(Translation $translation): JsonResponse
+    public function destroy($id): JsonResponse
     {
+        $translation = Translation::findOrFail($id);
         $translation->delete();
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
